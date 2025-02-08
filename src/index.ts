@@ -38,6 +38,9 @@ const io = new Server(server, {
 
 io.on("connection", socket => {
     console.log("a client connected");
+    socket.on("send_message", (arg) => {
+    console.log(arg);
+  });
 });
 
 mongoose
