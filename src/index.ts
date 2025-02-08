@@ -4,7 +4,7 @@ import cors from "cors";
 import { Request, Response } from "express";
 import { Server } from "socket.io";
 import mongoose from "mongoose";
-
+import { setupSocket } from "./helpers/socket-handler";
 require("dotenv").config();
 
 const PORT: Readonly<number> = 8003;
@@ -35,13 +35,8 @@ const io = new Server(server, {
         credentials: true,
     },
 });
+setupSocket(io);
 
-io.on("connection", socket => {
-    console.log("a client connected");
-    socket.on("send_message", (arg) => {
-    console.log(arg);
-  });
-});
 
 mongoose
     .connect(mongo_url, {})
