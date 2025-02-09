@@ -5,7 +5,8 @@ import IMessage from "../types/IMessage";
 const MessageSchema = new mongoose.Schema<IMessage>({
     conversation_id : {
         type : mongoose.Schema.Types.ObjectId, 
-        required : true
+        required : true, 
+        ref : "Conversation"
     }, 
     sender_id : {
         type : String, 
