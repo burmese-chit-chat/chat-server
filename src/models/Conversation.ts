@@ -8,7 +8,12 @@ const ConversationSchema = new mongoose.Schema<IConversation>({
     }, 
     last_message : {
         type : String, 
-        required : true
+        required : true 
+    }, 
+    is_seen : {
+        type : Boolean, 
+        required : false, 
+        default : false
     }
 }, {
     timestamps : true

@@ -6,6 +6,7 @@ import { Server } from "socket.io";
 import mongoose from "mongoose";
 import { setupSocket } from "./helpers/socket-handler";
 import message_routes from "./routes/messages";
+import conversation_routes from "./routes/conversations";
 require("dotenv").config();
 
 const PORT: Readonly<number> = 8003;
@@ -29,6 +30,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/messages", message_routes);
+app.use("/conversations", conversation_routes);
 
 const server = http.createServer(app);
 const io = new Server(server, {

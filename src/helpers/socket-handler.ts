@@ -46,7 +46,11 @@ async function get_new_or_old_conversation(receiver_id: string, sender_id: strin
         if (!conversation) {
             const new_conversation = await create_conversation_and_return_it([sender_id, receiver_id], last_message);
             return new_conversation;
-        } else return conversation;
+        } else {
+            conversation.last_message = last_message;
+            await conversation.save();
+            return conversation;
+        };
     } catch (e) {
         console.log("error in check_if_already_has_a_conversation", e);
         throw e;
