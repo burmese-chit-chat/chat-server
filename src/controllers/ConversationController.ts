@@ -27,7 +27,9 @@ function get_user_id_from_req_params (req : Request) : string {
 
 async function find_sorted_and_paginated_conversations_with_user_id (user_id : string) {
     try {
-        const conversations = await Conversation.find({ members : { $all : [user_id] } }).sort({ updatedAt : -1 });
+        const conversations = await Conversation.find({ members : { $all : [user_id] } }).sort({ updatedAt : -1 }).populate([
+            { path : "last_message", model : "Message" }
+        ]);
         return conversations;
     } catch (e) {
         throw e;

@@ -28,6 +28,17 @@ const MessageController = {
             console.log(e);
             send_error_response(res, 500, (e as Error).message);
         }
+    }, 
+    update_is_read_to_true : async function (req : Request, res : Response) {
+        try {
+            const { message_id } = req.params;
+            const message = await Message.findByIdAndUpdate(message_id, { is_read : true });
+            send_response(res, 200, message, "message updated");
+        } catch (e) {
+            console.log(e);
+            send_error_response(res, 500, (e as Error).message);
+        }
+
     }
 }
 export default MessageController;
