@@ -23,12 +23,14 @@ export const setupSocket = (io: Server) => {
         const { message, receiver_id, chat_room_id } = arg;
         try {
 
-            const conversation = await get_new_or_old_conversation(receiver_id, message.sender_id, message.message);
+            const conversation = await get_new_or_old_conversation(receiver_id, message.sender_id);
 
             if (!conversation) throw new Error("error creating conversation or old conversation cannot found");
 
             const new_message = await create_message_and_return_it({ sender_id: message.sender_id, conversation_id: conversation._id, message: message.message });
 
+            conversation.last_message = new_message;
+            await conversation.save();
             // emit to client
             io.to(chat_room_id).emit("new_message", new_message);
 
@@ -40,25 +42,25 @@ export const setupSocket = (io: Server) => {
     }
 };
 
-async function get_new_or_old_conversation(receiver_id: string, sender_id: string, last_message: string) {
+async function get_new_or_old_conversation(receiver_id: string, sender_id: string) {
     try {
         const conversation = await Conversation.findOne({ members: { $all: [receiver_id, sender_id] } });
         if (!conversation) {
-            const new_conversation = await create_conversation_and_return_it([sender_id, receiver_id], last_message);
+            const new_conversation = await create_conversation_and_return_it([sender_id, receiver_id]);
             return new_conversation;
-        } else return conversation;
+        } else {
+            await conversation.save();
+            return conversation;
+        };
     } catch (e) {
         console.log("error in check_if_already_has_a_conversation", e);
         throw e;
     }
 }
 
-async function create_conversation_and_return_it(members: Array<string>, last_message: string) {
+async function create_conversation_and_return_it(members: Array<string>) {
     try {
-        const conversation = new Conversation({
-            members,
-            last_message,
-        });
+        const conversation = new Conversation({ members });
         await conversation.save();
         return conversation;
     } catch (e) {

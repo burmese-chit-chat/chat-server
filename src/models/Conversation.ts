@@ -7,9 +7,10 @@ const ConversationSchema = new mongoose.Schema<IConversation>({
         required : true, 
     }, 
     last_message : {
-        type : String, 
-        required : true
-    }
+        type : mongoose.Schema.Types.ObjectId, 
+        required : false, 
+        ref : "Message" 
+    } 
 }, {
     timestamps : true
 });
