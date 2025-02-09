@@ -5,6 +5,7 @@ import { Request, Response } from "express";
 import { Server } from "socket.io";
 import mongoose from "mongoose";
 import { setupSocket } from "./helpers/socket-handler";
+import message_routes from "./routes/messages";
 require("dotenv").config();
 
 const PORT: Readonly<number> = 8003;
@@ -26,6 +27,8 @@ app.get("/", (req: Request, res: Response) => {
     console.log("path", req.path);
     res.send("hello world from burmese chit chat CHATTING service");
 });
+
+app.use("/messages", message_routes);
 
 const server = http.createServer(app);
 const io = new Server(server, {

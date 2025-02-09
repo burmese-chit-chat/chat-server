@@ -28,12 +28,14 @@ export const setupSocket = (io: Server) => {
             if (!conversation) throw new Error("error creating conversation or old conversation cannot found");
 
             const new_message = await create_message_and_return_it({ sender_id: message.sender_id, conversation_id: conversation._id, message: message.message });
-            const clientsInRoom = await io.in(chat_room_id).fetchSockets();
-            console.log(`Clients in room ${chat_room_id}:`, clientsInRoom.map(s => s.id));
 
+            // emit to client
             io.to(chat_room_id).emit("new_message", new_message);
+
         } catch (e) {
+
             io.to(global_socket.id).emit("error_message");
+
         }
     }
 };
