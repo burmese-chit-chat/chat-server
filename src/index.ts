@@ -29,6 +29,10 @@ app.get("/", (req: Request, res: Response) => {
     res.send("hello world from burmese chit chat CHATTING service");
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
 app.use("/messages", message_routes);
 app.use("/conversations", conversation_routes);
 
