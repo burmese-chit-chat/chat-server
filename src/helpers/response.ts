@@ -18,3 +18,7 @@ export function send_error_response(res: Response, status: number, message: stri
         message: message
     });
 }
+
+export function calculate_total_pages_for_pagination(total : number, limit : number) : number {
+    return Math.ceil(total / limit);
+}
