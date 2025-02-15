@@ -37,7 +37,23 @@ const ConversationController = {
             console.log(e);
             send_error_response(res, 500, (e as Error).message);
         }
+    }, 
+    destroy_with_conversation_id : async function (req : Request, res : Response) {
+        try {
+            const conversation_id = new mongoose.Types.ObjectId(get_conversation_id_from_req_params(req));
+
+            const conversation = await Conversation.findById(conversation_id);
+            await delete_all_messages_with_conversation_id(conversation?._id || conversation_id);
+            if(conversation) await conversation.deleteOne();
+            send_response(res, 200, null, 'conversation deleted');
+        } catch(e) {
+            console.log((e as Error).stack);
+            send_error_response(res, 500, (e as Error).message);
+        }
+
     }
+
+
 };
 
 export default ConversationController;
@@ -46,6 +62,12 @@ function get_user_id_from_req_params(req: Request): string {
     const { user_id } = req.params;
     if (!user_id) throw new Error("user_id is necessary");
     return user_id;
+}
+
+function get_conversation_id_from_req_params(req: Request): string {
+    const { conversation_id } = req.params;
+    if (!conversation_id) throw new Error("user_id is necessary");
+    return conversation_id;
 }
 
 async function find_sorted_and_paginated_conversations_with_user_id(user_id: string, page: number, limit: number) {
