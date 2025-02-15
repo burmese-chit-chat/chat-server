@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import Conversation from "../models/Conversation";
 import { calculate_total_pages_for_pagination, send_error_response, send_response } from "../helpers/response";
+import mongoose from "mongoose";
+import Message from "../models/Message";
 
 const CONVERSATION_LIMIT: Readonly<number> = 7;
 
@@ -23,6 +25,19 @@ const ConversationController = {
             send_error_response(res, 404, "cannot find conversations");
         }
     },
+
+    destroy_with_user_id  : async function (req : Request, res : Response) {
+        try {
+            const user_id  =  get_user_id_from_req_params(req);
+            const conversations = await find_all_conversations_with_user_id(user_id);
+            await Promise.all(conversations.map(item => delete_all_messages_with_conversation_id(item._id)));
+            await Promise.all(conversations.map(item => item.deleteOne()));
+            send_response(res, 200, null, 'successfully deleted messages and conversations');
+        } catch (e) {
+            console.log(e);
+            send_error_response(res, 500, (e as Error).message);
+        }
+    }
 };
 
 export default ConversationController;
@@ -35,6 +50,7 @@ function get_user_id_from_req_params(req: Request): string {
 
 async function find_sorted_and_paginated_conversations_with_user_id(user_id: string, page: number, limit: number) {
     try {
+
         const conversations = await Conversation.find({ members: { $all: [user_id] } })
             .sort({ updatedAt: -1 })
             .skip((page - 1) * limit)
@@ -43,6 +59,23 @@ async function find_sorted_and_paginated_conversations_with_user_id(user_id: str
         ;
 
         return conversations;
+    } catch (e) {
+        throw e;
+    }
+}
+
+async function find_all_conversations_with_user_id(user_id : string) {
+    try{
+        const conversations = await Conversation.find({ members : { $all : [ user_id ] } });
+        return conversations;
+    } catch (e) {
+        throw e;
+    }
+}
+
+async function delete_all_messages_with_conversation_id(conversation_id : mongoose.Types.ObjectId) {
+    try {
+        await Message.deleteMany({ conversation_id });
     } catch (e) {
         throw e;
     }
