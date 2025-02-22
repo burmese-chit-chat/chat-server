@@ -3,6 +3,7 @@ import Conversation from "../models/Conversation";
 import { calculate_total_pages_for_pagination, send_error_response, send_response } from "../helpers/response";
 import mongoose from "mongoose";
 import Message from "../models/Message";
+import IMessage from "../types/IMessage";
 
 const CONVERSATION_LIMIT: Readonly<number> = 7;
 
@@ -51,6 +52,23 @@ const ConversationController = {
             send_error_response(res, 500, (e as Error).message);
         }
 
+    }, 
+    count_unread_conversations_with_user_id : async function (req : Request, res : Response) {
+        try {
+            const user_id = get_user_id_from_req_params(req);
+            const conversations = await Conversation.find({ members : { $all : [ user_id ] } }).populate([{ path : "last_message", model : "Message" }]);
+            const unread_conversations_count = conversations.reduce((acc, item) => {
+                if(item.last_message  && (item.last_message as IMessage).sender_id !== user_id && !((item.last_message as IMessage).is_read)) {
+                    return acc + 1;
+                }
+                return acc;
+            }, 0);
+            send_response(res, 200, unread_conversations_count, 'unread conversations count');
+
+        } catch (e) {
+            console.log(e);
+            send_error_response(res, 500, (e as Error).message);
+        }
     }
 
 
